@@ -45,9 +45,9 @@ fn into_words(slice: &[u8]) -> Result<Vec<u32>> {
 }
 
 impl Proof {
-    pub fn of_raw(msg_raw: &[u8], core_raw: &[u32]) -> Result<Proof> {
+    pub fn from_raw(msg_raw: &[u8], core_raw: &[u32]) -> Result<Proof> {
         let mut err = ffi::RawError::default();
-        let ptr = unsafe { ffi::risc0_proof_of_raw(&mut err, msg_raw.as_ptr(), msg_raw.len(), core_raw.as_ptr(), core_raw.len()) };
+        let ptr = unsafe { ffi::risc0_proof_from_raw(&mut err, msg_raw.as_ptr(), msg_raw.len(), core_raw.as_ptr(), core_raw.len()) };
         let ptr = ffi::check(err, || ptr)?;
         Ok(Proof { ptr })
     }

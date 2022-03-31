@@ -41,11 +41,7 @@ private:
   size_t cursor;
 };
 
-class Prover;
-
 struct Proof {
-  friend class Prover;
-
 public:
   BufferU32 core;
 

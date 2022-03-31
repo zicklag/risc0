@@ -22,8 +22,8 @@ pub struct SignatureWithReceipt {
 }
 
 impl SignatureWithReceipt {
-    pub fn of_raw(msg_raw: &[u8], core_raw: &[u32]) -> Result<SignatureWithReceipt> {
-        let proof = Proof::of_raw(msg_raw, core_raw).unwrap();
+    pub fn from_raw(msg_raw: &[u8], core_raw: &[u32]) -> Result<SignatureWithReceipt> {
+        let proof = Proof::from_raw(msg_raw, core_raw).unwrap();
         Ok(SignatureWithReceipt { proof: proof })
     }
 
@@ -102,7 +102,7 @@ mod tests {
 
         // Verify the serialize/deserialize
         let (msg_raw, core_raw) = signing_receipt.get_raw().unwrap();
-        let deserialized_receipt = SignatureWithReceipt::of_raw(msg_raw, core_raw).unwrap();
+        let deserialized_receipt = SignatureWithReceipt::from_raw(msg_raw, core_raw).unwrap();
         deserialized_receipt.verify().unwrap();
 
         assert_eq!(

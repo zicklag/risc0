@@ -78,7 +78,7 @@ extern "C" {
 
     pub(crate) fn risc0_prover_run(err: *mut RawError, prover: *mut RawProver) -> *const RawProof;
 
-    pub(crate) fn risc0_proof_of_raw(err: *mut RawError, msg_raw: *const u8, msg_len: usize, core_raw: *const u32, core_len: usize) -> *const RawProof;
+    pub(crate) fn risc0_proof_from_raw(err: *mut RawError, msg_raw: *const u8, msg_len: usize, core_raw: *const u32, core_len: usize) -> *const RawProof;
 
     pub(crate) fn risc0_proof_verify(
         err: *mut RawError,
