@@ -105,6 +105,15 @@ risc0_proof* risc0_prover_run(risc0_error* err, risc0_prover* ptr) {
   });
 }
 
+risc0_proof* risc0_proof_of_raw(risc0_error* err, const uint8_t* msg_raw, size_t msg_len, const uint32_t* core_raw, size_t core_len) {
+  return ffi_wrap<risc0_proof*>(err, nullptr, [&] {
+    risc0::Buffer message(msg_raw, msg_raw + msg_len);
+    risc0::BufferU32 core(core_raw, core_raw + core_len);
+    risc0::Proof proof(core, message);
+    return new risc0_proof{proof};
+  });
+}
+
 void risc0_proof_verify(risc0_error* err, const char* elf_path, const risc0_proof* ptr) {
   ffi_wrap_void(err, [&] { ptr->proof.verify(elf_path); });
 }

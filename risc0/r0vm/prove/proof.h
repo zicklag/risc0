@@ -50,6 +50,8 @@ public:
   BufferU32 core;
 
 public:
+  Proof(const BufferU32& core, const Buffer& message);
+
   // Verify proof based on elf file
   void verify(const std::string& filename) const;
 
@@ -62,7 +64,6 @@ public:
   const Buffer& getMessage() const;
 
 private:
-  Proof(const BufferU32& core, const Buffer& message);
   ArchiveReader<CheckedStreamReader>& getReader() const;
 
 private:

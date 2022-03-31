@@ -13,7 +13,7 @@
 // limitations under the License.
 
 use clap::{Arg, Command};
-use lib::sign;
+use lib::{sign, SignatureWithReceipt};
 
 fn main() {
     let matches = Command::new("sign")
@@ -37,9 +37,15 @@ fn main() {
     let msg_str = matches.value_of("msg").unwrap();
     let pass_str = matches.value_of("pass").unwrap();
 
+    // Generate the signature
     let signing_receipt = sign(&pass_str, &msg_str).unwrap();
-    signing_receipt.verify().unwrap();
+    let (msg_raw, core_raw) = signing_receipt.get_raw().unwrap();
+    let deserialized_receipt = SignatureWithReceipt::of_raw(msg_raw, core_raw).unwrap();
 
-    log::info!("msg: {:?}", &msg_str);
-    log::info!("commit: {:?}", &signing_receipt.get_commit().unwrap());
+    log::info!(
+        "msg_raw.len() = {:?}; core_raw.len() = {:?}",
+        msg_raw.len(),
+        core_raw.len()
+    );
+    log::info!("commit: {:?}", &deserialized_receipt.verify().unwrap());
 }

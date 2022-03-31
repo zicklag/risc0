@@ -75,6 +75,8 @@ risc0_proof* risc0_prover_run(risc0_error* err, risc0_prover* ptr);
 // Proof
 //
 
+risc0_proof* risc0_proof_of_raw(risc0_error* err, const uint8_t* msg_raw, size_t msg_len, const uint32_t* core_raw, size_t core_len);
+
 void risc0_proof_verify(risc0_error* err, const char* code_id_path, const risc0_proof* ptr);
 
 const uint32_t* risc0_proof_get_core_buf(risc0_error* err, const risc0_proof* ptr);
