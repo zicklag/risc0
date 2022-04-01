@@ -114,8 +114,10 @@ mod tests {
         assert_eq!(msg_hash, signing_receipt.get_message().unwrap().msg);
 
         // Verify the serialize/deserialize
-        let raw = signing_receipt.to_raw().unwrap();
-        let deserialized_receipt = SignatureWithReceipt::from_raw(&raw).unwrap();
+        // let serialized_signing_receipt = bincode::serialize(&signing_receipt).unwrap();
+        // let deserialized_receipt = bincode::deserialize(&serialized_signing_receipt).unwrap();
+        let serialized_signing_receipt = serde_json::to_string(&signing_receipt)?;
+        let deserialized_receipt = serde_json::from_str(&serialized_signing_receipt)?;
         deserialized_receipt.verify().unwrap();
 
         assert_eq!(

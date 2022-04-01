@@ -39,15 +39,10 @@ fn main() {
 
     // Generate the signature
     let signing_receipt = sign(&pass_str, &msg_str).unwrap();
-    let raw = signing_receipt.to_raw().unwrap();
-    let deserialized_receipt = SignatureWithReceipt::from_raw(&raw).unwrap();
 
-    println!("{:?}", &raw);
-
-    log::info!(
-        "msg_raw.len() = {:?}; core_raw.len() = {:?}",
-        raw.journal.len(),
-        raw.seal.len()
-    );
-    log::info!("commit: {:?}", &deserialized_receipt.verify().unwrap());
+    // let serialized_signing_receipt = bincode::serialize(&signing_receipt).unwrap();
+    // let deserialized_receipt = bincode::deserialize(&serialized_signing_receipt).unwrap();
+    let serialized_signing_receipt = serde_json::to_string(&signing_receipt)?;
+    let deserialized_receipt = serde_json::from_str(&serialized_signing_receipt)?;
+    println!("{}", &serialized_signing_receipt);
 }

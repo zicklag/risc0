@@ -13,7 +13,9 @@
 // limitations under the License.
 
 use log::LevelFilter;
-use std::{ffi::CString, mem};
+use serde::de::{self, Deserialize, Deserializer, Visitor, SeqAccess, MapAccess};
+use serde::ser::{Serialize, Serializer, SerializeStruct};
+use std::{ffi::CString, fmt, mem};
 
 mod exception;
 mod ffi;
@@ -93,6 +95,108 @@ impl Receipt {
 
     pub fn get_journal_vec(&self) -> Result<Vec<u32>> {
         into_words(self.get_journal()?)
+    }
+}
+
+impl Serialize for Receipt {
+    fn serialize<S>(&self, serializer: S) -> std::result::Result<S::Ok, S::Error>
+    where
+        S: Serializer,
+    {
+        let mut state = serializer.serialize_struct("Receipt", 2)?;
+        state.serialize_field("journal", self.get_journal().unwrap())?;
+        state.serialize_field("seal", self.get_seal().unwrap())?;
+        state.end()
+    }
+}
+
+impl<'de> Deserialize<'de> for Receipt {
+    fn deserialize<D>(deserializer: D) -> std::result::Result<Self, D::Error>
+    where
+        D: Deserializer<'de>,
+    {
+        enum Field { Journal, Seal }
+
+        impl<'de> Deserialize<'de> for Field {
+            fn deserialize<D>(deserializer: D) -> std::result::Result<Field, D::Error>
+            where
+                D: Deserializer<'de>,
+            {
+                struct FieldVisitor;
+
+                impl<'de> Visitor<'de> for FieldVisitor {
+                    type Value = Field;
+
+                    fn expecting(&self, formatter: &mut fmt::Formatter) -> fmt::Result {
+                        formatter.write_str("`journal` or `seal`")
+                    }
+
+                    fn visit_str<E>(self, value: &str) -> std::result::Result<Field, E>
+                    where
+                        E: de::Error,
+                    {
+                        match value {
+                            "journal" => Ok(Field::Journal),
+                            "seal" => Ok(Field::Seal),
+                            _ => Err(de::Error::unknown_field(value, FIELDS)),
+                        }
+                    }
+                }
+
+                deserializer.deserialize_identifier(FieldVisitor)
+            }
+        }
+
+        struct ReceiptVisitor;
+
+        impl<'de> Visitor<'de> for ReceiptVisitor {
+            type Value = Receipt;
+
+            fn expecting(&self, formatter: &mut fmt::Formatter) -> fmt::Result {
+                formatter.write_str("struct Receipt")
+            }
+
+            fn visit_seq<V>(self, mut seq: V) -> std::result::Result<Receipt, V::Error>
+            where
+                V: SeqAccess<'de>,
+            {
+                let journal: Vec<u8> = seq.next_element()?
+                    .ok_or_else(|| de::Error::invalid_length(0, &self))?;
+                let seal: Vec<u32> = seq.next_element()?
+                    .ok_or_else(|| de::Error::invalid_length(1, &self))?;
+                Ok(Receipt::from_raw(&journal[..], &seal[..]).unwrap())
+            }
+
+            fn visit_map<V>(self, mut map: V) -> std::result::Result<Receipt, V::Error>
+            where
+                V: MapAccess<'de>,
+            {
+                let mut journal: Option<Vec<u8>> = None;
+                let mut seal: Option<Vec<u32>> = None;
+                while let Some(key) = map.next_key()? {
+                    match key {
+                        Field::Journal => {
+                            if journal.is_some() {
+                                return Err(de::Error::duplicate_field("journal"));
+                            }
+                            journal = Some(map.next_value()?);
+                        }
+                        Field::Seal => {
+                            if seal.is_some() {
+                                return Err(de::Error::duplicate_field("seal"));
+                            }
+                            seal = Some(map.next_value()?);
+                        }
+                    }
+                }
+                let journal = journal.ok_or_else(|| de::Error::missing_field("journal"))?;
+                let seal = seal.ok_or_else(|| de::Error::missing_field("seal"))?;
+                Ok(Receipt::from_raw(&journal[..], &seal[..]).unwrap())
+            }
+        }
+
+        const FIELDS: &'static [&'static str] = &["journal", "seal"];
+        deserializer.deserialize_struct("Receipt", FIELDS, ReceiptVisitor)
     }
 }
 
