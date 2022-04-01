@@ -46,8 +46,8 @@ fn main() {
 
     log::info!(
         "msg_raw.len() = {:?}; core_raw.len() = {:?}",
-        raw.msg.len(),
-        raw.core.len()
+        raw.journal.len(),
+        raw.seal.len()
     );
     log::info!("commit: {:?}", &deserialized_receipt.verify().unwrap());
 }

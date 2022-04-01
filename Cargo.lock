@@ -26,20 +26,20 @@ dependencies = [
 name = "battleship"
 version = "0.1.0"
 dependencies = [
- "battleship-proof",
+ "battleship-core",
  "log",
- "r0vm-core",
- "r0vm-host",
- "r0vm-serde",
+ "zkvm-core",
+ "zkvm-host",
+ "zkvm-serde",
  "serde",
 ]
 
 [[package]]
-name = "battleship-proof"
+name = "battleship-core"
 version = "0.1.0"
 dependencies = [
- "r0vm-core",
- "r0vm-device",
+ "zkvm-core",
+ "zkvm-guest",
  "serde",
 ]
 
@@ -144,38 +144,38 @@ dependencies = [
 ]
 
 [[package]]
-name = "r0vm-core"
+name = "zkvm-core"
 version = "0.1.0"
 dependencies = [
  "serde",
 ]
 
 [[package]]
-name = "r0vm-device"
+name = "zkvm-guest"
 version = "0.1.0"
 dependencies = [
- "r0vm-core",
- "r0vm-serde",
+ "zkvm-core",
+ "zkvm-serde",
  "serde",
 ]
 
 [[package]]
-name = "r0vm-host"
+name = "zkvm-host"
 version = "0.1.0"
 dependencies = [
  "byte-slice-cast",
  "ctor",
  "env_logger",
  "log",
- "r0vm-core",
+ "zkvm-core",
  "serde",
 ]
 
 [[package]]
-name = "r0vm-serde"
+name = "zkvm-serde"
 version = "0.1.0"
 dependencies = [
- "r0vm-core",
+ "zkvm-core",
  "serde",
 ]
 
