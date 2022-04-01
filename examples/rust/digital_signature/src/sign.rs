@@ -39,13 +39,15 @@ fn main() {
 
     // Generate the signature
     let signing_receipt = sign(&pass_str, &msg_str).unwrap();
-    let (msg_raw, core_raw) = signing_receipt.get_raw().unwrap();
-    let deserialized_receipt = SignatureWithReceipt::of_raw(msg_raw, core_raw).unwrap();
+    let raw = signing_receipt.to_raw().unwrap();
+    let deserialized_receipt = SignatureWithReceipt::from_raw(&raw).unwrap();
+
+    println!("{:?}", &raw);
 
     log::info!(
         "msg_raw.len() = {:?}; core_raw.len() = {:?}",
-        msg_raw.len(),
-        core_raw.len()
+        raw.msg.len(),
+        raw.core.len()
     );
     log::info!("commit: {:?}", &deserialized_receipt.verify().unwrap());
 }

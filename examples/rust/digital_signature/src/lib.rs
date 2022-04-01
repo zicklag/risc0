@@ -15,22 +15,32 @@
 pub use digital_signature_proof::{Message, Passphrase, SignMessageCommit, SigningRequest};
 use r0vm_host::{Proof, Prover, Result};
 use r0vm_serde::{from_slice, to_vec};
+use serde::{Deserialize, Serialize};
 use sha2::{Digest, Sha256};
+
+#[derive(Clone, Debug, Deserialize, Eq, PartialEq, Serialize)]
+pub struct RawSignatureWithReceipt {
+    pub msg: Vec<u8>,
+    pub core: Vec<u32>,
+}
 
 pub struct SignatureWithReceipt {
     proof: Proof,
 }
 
 impl SignatureWithReceipt {
-    pub fn from_raw(msg_raw: &[u8], core_raw: &[u32]) -> Result<SignatureWithReceipt> {
-        let proof = Proof::from_raw(msg_raw, core_raw).unwrap();
+    pub fn from_raw(raw: &RawSignatureWithReceipt) -> Result<SignatureWithReceipt> {
+        let proof = Proof::from_raw(&raw.msg, &raw.core).unwrap();
         Ok(SignatureWithReceipt { proof: proof })
     }
 
-    pub fn get_raw(&self) -> Result<(&[u8], &[u32])> {
+    pub fn to_raw(&self) -> Result<RawSignatureWithReceipt> {
         let proof_msg = self.proof.get_message().unwrap();
         let proof_core = self.proof.get_core().unwrap();
-        Ok((proof_msg, proof_core))
+        Ok(RawSignatureWithReceipt {
+            msg: proof_msg.to_vec(),
+            core: proof_core.to_vec(),
+        })
     }
 
     pub fn get_commit(&self) -> Result<SignMessageCommit> {
@@ -101,13 +111,13 @@ mod tests {
         assert_eq!(msg_hash, signing_receipt.get_message().unwrap().msg);
 
         // Verify the serialize/deserialize
-        let (msg_raw, core_raw) = signing_receipt.get_raw().unwrap();
-        let deserialized_receipt = SignatureWithReceipt::from_raw(msg_raw, core_raw).unwrap();
+        let raw = signing_receipt.to_raw().unwrap();
+        let deserialized_receipt = SignatureWithReceipt::from_raw(&raw).unwrap();
         deserialized_receipt.verify().unwrap();
 
         assert_eq!(
-            deserialized_receipt.get_raw().unwrap(),
-            signing_receipt.get_raw().unwrap()
+            deserialized_receipt.to_raw().unwrap(),
+            signing_receipt.to_raw().unwrap()
         );
 
         log::info!("msg: {:?}", &msg_str);
